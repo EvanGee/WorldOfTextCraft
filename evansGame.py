@@ -36,6 +36,6 @@ def create_game():
     #game.run()
 
 
-test()
+#test()
 if __name__ == "__main__":
     create_game()
