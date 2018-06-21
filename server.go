@@ -168,6 +168,9 @@ func main() {
 		}
 		nc := newClient(&server, conn)
 		fmt.Print("new client!")
+
+		input := fmt.Sprintf("%d:%s", nc.id, "hello")
+		game.gameInChannel <- input
 		connectionMap[nc.id] = nc
 
 		go handleClient(nc, game)
