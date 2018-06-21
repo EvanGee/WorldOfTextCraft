@@ -23,8 +23,9 @@ class Engine:
     def register_player_description(self, id, text):
         player = self.players[id]
         if player.description == "":
-            player.add_description(text)
-            player.speak_to_player("Looking good: " + player.description)
+            player.add_description(player.name)
+            player.add_examine_description(text)
+            player.speak_to_player("Looking good: " + player.name + " good luck!")
         else:
             return False
         return True
@@ -59,7 +60,7 @@ class Engine:
         self.welcomeMessage(newPlayer)
         self.start_container.add_entity(newPlayer)
         return newPlayer
-        
+
     def parse_command(self, player, text):
         if (text[0] == '*'): 
             trigger_words = text.split()
@@ -84,12 +85,15 @@ class Engine:
                 self.players[_id].speak_to_player(msg)
     
     def check_room_for_triggers(self, trigger_words, player):
+       
         list_of_entities = []
 
         self.find_entitites_with_triggers(trigger_words, player.current_room, list_of_entities)
 
         for entity in list_of_entities:
             entity.try_commands(trigger_words, player)
+
+        print(list_of_entities)
 
     def find_entitites_with_triggers(self, trigger_words, entity, list_of_entities):    
         if (len(intersection(entity.get_trigger_words(), trigger_words)) != 0):
@@ -125,20 +129,25 @@ class Entity:
         self.commands = []
         self.add_command(Command(self.examine, examine_word_set, [self]))
         self.add_command(Command(self.explore, exploring_word_set, [self]))
-
         self.trigger_words = trigger_words
         
-
     def add_entity(self, entity):
         self.entities.append(entity)
 
     def examine(self, entities, player):
+        player.speak_to_player("-------------------------------------------------------------------")
         player.speak_to_player(self.examine_description)
         player.speak_to_player("")
+        
 
     def explore(self, entities, player):
-        player.speak_to_player(self.description)
+        player.speak_to_player("-------------------------------------------------------------------")
+        player.speak_to_player(self.get_description())
         player.speak_to_player("")
+
+        for e in self.entities:
+            player.speak_to_player(e.get_description())
+            player.speak_to_player("")
 
     def get_entities(self):
         return self.entities
@@ -167,10 +176,10 @@ class Entity:
         return self.examine_description
 
     def add_trigger_words(self, words):
-        self.trigger_words.add(words)
+        self.trigger_words.add(words.toLower())
 
     def delete_trigger_words(self, words):
-        self.trigger_words = self.trigger_words.difference(words)
+        self.trigger_words = self.trigger_words.difference(words.toLower())
 
     def get_trigger_words(self):
         return self.trigger_words
@@ -186,6 +195,8 @@ class Entity:
 
     def __repr__(self):
         return self.description
+    
+
 
 
 class Command:
@@ -245,6 +256,10 @@ class Player(Entity):
     def __repr__(self):
         return self.name
 
+    def move(self, newRoom):
+        self.current_room.remove(self)
+        self.current_room = newRoom
+        newRoom.add_entity(self)
 
 #Utils https://www.geeksforgeeks.org/python-intersection-two-lists/
 def intersection(lst1, lst2):

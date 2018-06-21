@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"net"
@@ -15,6 +14,7 @@ func processClient(conn net.Conn) {
 	}
 }
 
+/*
 func main() {
 
 	// connect to this socket
@@ -34,3 +34,4 @@ func main() {
 		fmt.Fprintf(conn, text)
 	}
 }
+*/

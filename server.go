@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/pborman/getopt"
 )
 
 type Game struct {
@@ -130,10 +131,12 @@ func bindStdInAndStdOut(name string, arg ...string) (io.WriteCloser, *bufio.Read
 
 func main() {
 
-	runtime := os.Args[1]
-	file := os.Args[2]
+	optPort := getopt.StringLong("p", 'p', "", "The port that the server will use to run")
+	optRunTime := getopt.StringLong("r", 'r', "", "The runtime you want to run your game in, eg, python3")
+	optGameEntryPoint := getopt.StringLong("g", 'g', "", "The entry point of the game you want to run")
+	getopt.Parse()
 
-	gameIn, gameOut := bindStdInAndStdOut(runtime, file)
+	gameIn, gameOut := bindStdInAndStdOut(*optRunTime, *optGameEntryPoint)
 	gameInChannel := make(chan string)
 	gameOutChannel := make(chan string)
 
@@ -144,9 +147,8 @@ func main() {
 	connectionMap := make(map[int]*Client)
 	handleClientWrites(connectionMap, game)
 
-	port := "1111"
-	fmt.Print("Listening on port: ", port)
-	server := Server{port, 0}
+	fmt.Print("Listening on port: ", *optPort)
+	server := Server{*optPort, 0}
 	listener, err := net.Listen("tcp", "0.0.0.0:"+server.Port)
 
 	if err != nil {
