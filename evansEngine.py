@@ -7,11 +7,20 @@ Entity_id_count = 0
 
 class Engine:
     # Map player ids to their entities
-    def __init__(self, RootContainer, container_dict, welcomeMessage):
+    def __init__(self, welcome_message):
         self.players = dict()
-        self.container_dict = container_dict
-        self.start_container = RootContainer
-        self.welcomeMessage = welcomeMessage
+        self.container_dict = dict()
+        self.welcomeMessage = welcome_message
+        self.start_container = {}
+
+    def add_room(self, name, entity):
+        self.container_dict[name] = entity
+
+    def get_room(self, name):
+        return self.container_dict[name]
+
+    def start_room(self, name):
+        self.start_container = self.container_dict[name]
 
     def register_player_name(self, id, name):
         if id not in self.players:
@@ -76,7 +85,7 @@ class Engine:
 
     def broadcast_text(self, fromPlayer, text):
         for _id in self.players:
-            if (_id != fromPlayer.id and fromPlayer.current_room.has_entity(self.players[_id])):
+            if (_id != fromPlayer.id and fromPlayer.current_parent.has_entity(self.players[_id])):
                 self.players[_id].speak_to_player(fromPlayer.get_name()+": "+text)
     
     def broadcast_msg(self, fromPlayer, msg):
@@ -88,12 +97,11 @@ class Engine:
        
         list_of_entities = []
 
-        self.find_entitites_with_triggers(trigger_words, player.current_room, list_of_entities)
+        self.find_entitites_with_triggers(trigger_words, player.current_parent, list_of_entities)
 
         for entity in list_of_entities:
             entity.try_commands(trigger_words, player)
 
-        print(list_of_entities)
 
     def find_entitites_with_triggers(self, trigger_words, entity, list_of_entities):    
         if (len(intersection(entity.get_trigger_words(), trigger_words)) != 0):
@@ -104,7 +112,7 @@ class Engine:
             self.find_entitites_with_triggers(trigger_words, child, list_of_entities)
 
     def remove_player(self, player):
-        player.current_room.remove(player)
+        player.current_parent.remove(player)
         del self.players[player.id]
 
 def get_id(command):
@@ -133,6 +141,7 @@ class Entity:
         
     def add_entity(self, entity):
         self.entities.append(entity)
+        entity.current_parent = self
 
     def examine(self, entities, player):
         player.speak_to_player("-------------------------------------------------------------------")
@@ -193,6 +202,10 @@ class Entity:
                 return True
         return False
 
+    def move(self, new_entity):
+        self.current_parent.remove(self)
+        new_entity.add_entity(self)
+
     def __repr__(self):
         return self.description
     
@@ -228,15 +241,15 @@ class Player(Entity):
         self.id = id
         self.name = name
         self.engine = engine
-        self.current_room = engine.start_container
+        self.current_parent = engine.start_container
     
     #command for killing players
     def kill(self, entities, player):
         ##TODO DROP looots
         self.speak_to_player("YOU'RE DEAD SUCKER...enter a new name to reconnect")
-        self.current_room.remove(self)
+        self.current_parent.remove(self)
         self.engine.remove_player(self)
-        self.current_room.get_entities().extend(self.entities)
+        self.current_parent.get_entities().extend(self.entities)
         
     def display_items(self, entities, player):
         player.speak_to_player("Items: ")
@@ -256,10 +269,7 @@ class Player(Entity):
     def __repr__(self):
         return self.name
 
-    def move(self, newRoom):
-        self.current_room.remove(self)
-        self.current_room = newRoom
-        newRoom.add_entity(self)
+
 
 #Utils https://www.geeksforgeeks.org/python-intersection-two-lists/
 def intersection(lst1, lst2):

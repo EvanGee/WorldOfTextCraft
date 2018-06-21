@@ -8,14 +8,14 @@ from evansEngine import Engine, Entity, Player, Command
 def travel(entities, player):
     player.move(entities[0])
 
-
-def Kansas(room_containers):
+def Kansas(engine):
     city = Entity(["city", "kanzas"])
     city.add_description("It is Kanzas city, it smells of barbecue chicken and craft beer")
     city.add_examine_description("You can't be more exited to leave this place")
 
     nextCity = Entity(["iowa"])
-    nextCity.add_command(Command(travel, ["go", "travel"], [room_containers['Iowa']]))
+    nextCity.add_command(Command(travel, ["go", "travel"], [engine.get_room('Iowa')]))
+
     nextCity.add_description("There is a highway, and a roadsign that says 'next stop Iowa'")
     nextCity.add_examine_description("The road looks arduous")
 
@@ -80,12 +80,13 @@ def welcomeMessage(player):
 
 
 def create_game():
-    room_containers = dict()
-    room_containers["Iowa"] = Iowa(room_containers)
-    room_containers["Kansas"] = Kansas(room_containers)
-    engine = Engine(room_containers["Kansas"], room_containers, welcomeMessage)
-
+    engine = Engine(welcomeMessage)
+    engine.add_room("Iowa", Iowa(engine))
+    engine.add_room("Kansas", Kansas(engine))
+    engine.start_room("Kansas")
     
+
+
     #engine.run()
     test_start(engine)
     
