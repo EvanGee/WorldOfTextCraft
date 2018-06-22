@@ -11,7 +11,7 @@ class Engine:
         self.players = dict()
         self.container_dict = dict()
         self.welcomeMessage = welcome_message
-        self.start_container = {}
+        self.start_container = Entity(["start"])
 
     def add_room(self, name, entity):
         self.container_dict[name] = entity
@@ -22,21 +22,46 @@ class Engine:
     def start_room(self, name):
         self.start_container = self.container_dict[name]
 
-    def register_player_name(self, id, name):
-        if id not in self.players:
-            self.new_player(id, name.lower().replace(" ", ""))
-            self.players[id].speak_to_player("please enter a description of your character:")
+    def register_player(self, id, text):
+
+        if(self.register_player_id(id)):
             return True
-        
+
+        if(self.register_player_name(id, text)):
+            return True
+
+        if(self.register_player_description(id, text)):
+            return True
+        return False
+            
+    def register_player_id(self, id):
+        if id not in self.players:
+            self.new_player(id, "")
+            self.players[id].speak_to_player("please enter your name:")
+            return True
+
+    def register_player_name(self, id, name):
+        player = self.players[id]
+        if player.get_name() == "":
+            newName = name.replace(" ", "")
+            for key, player in self.players.items():
+                if player.name == newName:
+                    player.speak_to_player("someone is using that name please enter a new name")
+                    return False
+
+            player.name = newName
+            player.speak_to_player("please enter a description of your character:")
+            return True
         
     def register_player_description(self, id, text):
         player = self.players[id]
-        if player.description == "":
-            player.add_description(player.name)
-            player.add_examine_description(text)
-            player.speak_to_player("Looking good: " + player.name + " good luck!")
-        else:
+        if player.description != "":
             return False
+
+        player.add_description(player.name)
+        player.add_examine_description(text)
+        player.speak_to_player("Looking good: " + player.name + " good luck!")
+        self.start_container.add_entity(player)
         return True
 
     def run(self):
@@ -44,29 +69,21 @@ class Engine:
         while True:
             id, text = get_id(input())
 
-            #try:
-            if text == "new":
+            #for sigsegv
+            if(text=="None"):
                 continue
 
-            if(self.register_player_name(id, text)):
+            if(self.register_player(id, text)):
                 continue
 
-            if(self.register_player_description(id, text)):
-                continue
 
             self.parse_command(self.players[id], text)
 
     def new_player(self, id, name):
         "Create and register a new player"
         newPlayer = Player(id, name, self)
-        for key, player in self.players.items():
-            if player.name == name:
-                newPlayer.speak_to_player("someone is using that name please enter a new name")
-                return 
-                
         self.players[id] = newPlayer
         self.welcomeMessage(newPlayer)
-        self.start_container.add_entity(newPlayer)
         return newPlayer
 
     def parse_command(self, player, text):

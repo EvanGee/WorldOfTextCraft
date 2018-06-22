@@ -14,9 +14,10 @@ def Iowa(room_routes):
     return city
 
 def test_start(engine):
-    player_one = engine.new_player(1, "evan")
-    player_one.add_description("Evan")
-    player_one.add_examine_description("a tall man")
+    id = 1
+    engine.register_player_id(id)
+    engine.register_player_name(id, "evan")
+    engine.register_player_description(id, "tall and good")
     commands = [
         "*explore city",
         "*explore small shop",
@@ -33,7 +34,7 @@ def test_start(engine):
         #"* explore city",
     ]
     for command in commands:
-        engine.parse_command(player_one, command)
+        engine.parse_command(engine.players[id], command)
 
 
 
@@ -62,8 +63,8 @@ def create_game():
     engine.start_room("Kansas")
     
 
-    engine.run()
-    #test_start(engine)
+    #engine.run()
+    test_start(engine)
     
 #test()
 if __name__ == "__main__":
