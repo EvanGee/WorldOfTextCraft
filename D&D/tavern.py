@@ -12,7 +12,7 @@ def Table(parent, engine):
     table.add_entity(Chair(engine, 1))
     table.add_entity(Chair(engine, 2))
     table.add_command(command_travel(table))
-    #table.add_command(command_travel(parent))
+    table.add_command(command_travel(parent))
 
     return table
 

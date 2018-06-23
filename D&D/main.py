@@ -6,11 +6,18 @@ import sys
 sys.path.append("./")
 from Engine import Engine, Entity, Player, Command
 from tavern import *
+
+def create_character(engine, id):
+    player_stats = {"str": 10}
+    engine.players[id].data = player_stats
+
 def test_start(engine):
     id = 1
     engine.register_player_id(id)
     engine.register_player_name(id, "Evan")
     engine.register_player_description(id, "tall and good")
+    create_character(engine, id)
+
     commands = [
         "*e",
         #"*ex tavern",
@@ -22,10 +29,9 @@ def test_start(engine):
         "*i",
         "*get chair1",
         #"*e",
-        "*i",
         "*back",
-        "*e",
     ]
+
     for command in commands:
         engine.parse_command(engine.players[id], command)
 

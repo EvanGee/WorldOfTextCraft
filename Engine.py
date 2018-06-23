@@ -180,7 +180,11 @@ class Entity:
         self.add_command(Command(self.explore, exploring_word_set, [self]))
         self.trigger_words = cleanTriggerWords(trigger_words)
         self.is_player = False
+        self.data = {}
         
+    def get_data(self):
+        return self.data
+
     def add_entity(self, entity):
         self.entities.append(entity)
         entity.current_parent = self
@@ -194,7 +198,6 @@ class Entity:
         player.speak_to_player(self.examine_description)
         player.speak_to_player("")
         
-
     def explore(self, entities, player):
         player.speak_to_player("-------------------------------------------------------------------")
         player.speak_to_player(self.get_description())
@@ -215,8 +218,6 @@ class Entity:
             
         if (index_to_delete):
             del self.entities[index_to_delete]
-
-
 
     def add_command(self, command):
         self.commands.append(command)
@@ -259,8 +260,6 @@ class Entity:
     def __repr__(self):
         return self.description
     
-
-
 
 class Command:
     """Each Entity has commands equiped to them, that perform
@@ -308,7 +307,6 @@ class Player(Entity):
         for e in entities:
             player.speak_to_player("   " + e.get_examine_description())
 
-
     def speak_to_player(self, text):
         "Write text for client with id"
         print("{}:{}".format(self.id, text))
@@ -329,7 +327,6 @@ class Player(Entity):
 #Utils https://www.geeksforgeeks.org/python-intersection-two-lists/
 def intersection(lst1, lst2):
     return list(set(lst1) & set(lst2))
-
 
 def cleanTriggerWords(words):
     for word in words:

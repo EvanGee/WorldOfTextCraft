@@ -16,3 +16,10 @@ def command_travel(room):
 
 def command_pick_up(item):
     return Command(pickUpItems, ["get", "pick"], [item])
+
+
+def command_use_item(item):
+    return Command(use_item, ["use"], [item])
+
+def use_item(entities, player):
+    return
