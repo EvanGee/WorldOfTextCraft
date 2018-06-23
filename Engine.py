@@ -311,7 +311,7 @@ def cleanTriggerWords(words):
 
 
 
-exploring_word_set = ["look", "discover", "survey", "tour", "scout", "peer", "gander", "explore"]
-examine_word_set = ["search", "probe", "scrutinize", "research", "examine", "analyze", "seek", "prospect", "inspect", "question", "sift"]
+exploring_word_set = ["e","look", "discover", "survey", "tour", "scout", "peer", "gander", "explore"]
+examine_word_set = ["ex", "search", "probe", "scrutinize", "research", "examine", "analyze", "seek", "prospect", "inspect", "question", "sift"]
 action_word_set = ["try", "attempt", "attack", "experiment", "endeavor", "tryout", "venture", "touch", "interact"]
 

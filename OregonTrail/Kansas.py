@@ -1,7 +1,7 @@
 
 from Engine import Engine, Entity, Player, Command
 
-from gameFunctions import *
+from gameFunctions import command_travel, command_pick_up
 
 
 def TalkToShopOwner(entities, player):
@@ -42,11 +42,27 @@ def KansasHouse():
     snacks = Entity(["money"])
     snacks.add_description("Maybe she has some money if you ask nicely")
     snacks.add_examine_description("$100")
-    snacks.add_command(Command(pickUpItems, ["take", "get", "ask", ], [snacks]))
+    snacks.add_command(command_pick_up(snacks))
 
     mom.add_entity(snacks)
     house.add_entity(car)
     house.add_entity(mom)
+
+    return house
+
+def create_house(engine):
+    #add a new room
+    engine.add_room("Kanzas_House", KansasHouse())
+
+    #create a new house for the city
+    house = Entity(["house"])
+    house.add_description("A small suburban house with a white picket fence (your house)")
+    house.add_examine_description("your parents house")
+
+    #add command to travel to new room
+    house.add_command(command_travel(engine.get_room("Kanzas_House")))
+
+
     return house
 
 def Kansas(engine):
@@ -55,12 +71,18 @@ def Kansas(engine):
     city.add_examine_description("You can't be more exited to leave this place")
 
     nextCity = Entity(["iowa"])
-    nextCity.add_command(Command(travel, ["go", "travel"], [engine.get_room('Iowa')]))
+    nextCity.add_command(command_travel(engine.get_room("Iowa")))
     nextCity.add_description("There is a highway, and a roadsign that says 'next stop Iowa'")
     nextCity.add_examine_description("The road looks arduous")
 
+
+
+
+
+
     city.add_entity(nextCity)
-    city.add_entity(KansasHouse())
+    city.add_entity(create_house(engine))
+
     city.add_entity(KansasStore())
     
     return city
