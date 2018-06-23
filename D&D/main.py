@@ -12,11 +12,12 @@ def test_start(engine):
     engine.register_player_name(id, "evan")
     engine.register_player_description(id, "tall and good")
     commands = [
-        "*explore tavern",
-        "*ex tavern",
-        "*e table",
-        "*ex chair1",
-        "go to table"
+        #"*explore tavern",
+        #"*ex tavern",
+        #"*e table",
+        "*go to table",
+        #"*ex chair1",
+        "*e"
 
     ]
     for command in commands:

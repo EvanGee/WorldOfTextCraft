@@ -11,6 +11,8 @@ def Table(engine):
     table.add_examine_description("a wooden table, it looks like a good place to place things")
     table.add_entity(Chair(engine, 1))
     table.add_entity(Chair(engine, 2))
+    table.add_command(command_travel(table))
+
     return table
 
 def Chair(engine, id):

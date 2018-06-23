@@ -107,27 +107,32 @@ class Engine:
     
     def check_room_for_triggers(self, trigger_words, player):
        
-        list_of_entities = []
+        if self.check_if_exploring(player, trigger_words):
+            return
 
-        self.find_entitites_with_triggers(trigger_words, player.current_parent, list_of_entities)
+        list_of_entities = []
+        self.check_if_triggered(player.current_parent, trigger_words, list_of_entities)
+
+        for entity in player.current_parent.get_entities():
+            self.check_if_triggered(entity, trigger_words, list_of_entities)
 
         if len(list_of_entities) == 0:
-            player.speak_to_player("Command not found")
+            player.speak_to_player("Command not found, you may not be close enough to the target.")
 
         for entity in list_of_entities:
             entity.try_commands(trigger_words, player)
 
-       
+    def check_if_exploring(self, player, trigger_words):
+        if len(trigger_words) == 1:
+            if (trigger_words[0] == "e" or trigger_words[0] == "ex"):
+                player.current_parent.try_commands(trigger_words, player)
+                return True
+        return False
 
-
-    def find_entitites_with_triggers(self, trigger_words, entity, list_of_entities):    
+    def check_if_triggered(self, entity, trigger_words, list_of_entities):
         if (len(intersection(entity.get_trigger_words(), trigger_words)) != 0):
             list_of_entities.append(entity)
-
-        children = entity.get_entities()
-        for child in children:
-            self.find_entitites_with_triggers(trigger_words, child, list_of_entities)
-
+    
     def remove_player(self, player):
         player.current_parent.remove(player)
         del self.players[player.id]
@@ -285,9 +290,8 @@ class Player(Entity):
         "Write text for client with id"
         print("{}:{}".format(self.id, text))
 
-
     def examine(self, entities, player):
-        self.engine.broadcast_msg("" + player.get_description() + "is examining" + self.get_description())
+        self.engine.broadcast_msg(self, "" + player.get_description() + "is examining" + self.get_description())
         player.speak_to_player(self.examine_description)
         player.speak_to_player("")
 
