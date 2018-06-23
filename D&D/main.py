@@ -9,16 +9,22 @@ from tavern import *
 def test_start(engine):
     id = 1
     engine.register_player_id(id)
-    engine.register_player_name(id, "evan")
+    engine.register_player_name(id, "Evan")
     engine.register_player_description(id, "tall and good")
     commands = [
-        #"*explore tavern",
+        "*e",
         #"*ex tavern",
         #"*e table",
         "*go to table",
-        #"*ex chair1",
-        "*e"
-
+        "*e",
+        #"*e",
+        #"*ex",
+        "*i",
+        "*get chair1",
+        #"*e",
+        "*i",
+        "*back",
+        "*e",
     ]
     for command in commands:
         engine.parse_command(engine.players[id], command)
@@ -36,9 +42,10 @@ def welcomeMessage(player):
     player.speak_to_player("welcome to WorldOfTextCraft! " + player.get_name() + "!!!")
     player.speak_to_player("if you just type something it will broadcast to all players. ")
     player.speak_to_player("if you type '*' and then a command we will try to figure it out. ")
-    player.speak_to_player("*i [yourName] -- this will diplay your items. ")
-    player.speak_to_player("*explore [target]  -- this will give you an overview of the target ")
-    player.speak_to_player("*examine [target]  -- this will give you a closer view of the target ")
+    player.speak_to_player("*i [player] -- this will diplay items. '*i' to check your own quickly")
+    player.speak_to_player("*explore [target]  -- this will give you an overview of the target 'e' for short")
+    player.speak_to_player("*examine [target]  -- this will give you a closer view of the target 'ex' for short")
+    player.speak_to_player("*back -- will bring you to the room you came from")
     player.speak_to_player("-------------------------------------------------------------------")
     WelcomeMessage(player)
 

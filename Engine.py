@@ -14,6 +14,7 @@ class Engine:
         self.start_container = Entity(["start"])
 
     def add_room(self, name, entity):
+        entity.current_parent = entity
         self.container_dict[name] = entity
 
     def get_room(self, name):
@@ -42,22 +43,32 @@ class Engine:
 
     def register_player_name(self, id, name):
         player = self.players[id]
-        if player.get_name() == "":
-            newName = name.replace(" ", "")
-            for key, player in self.players.items():
-                if player.name == newName:
-                    player.speak_to_player("someone is using that name please enter a new name")
-                    return False
+        if player.get_name() != "":
+            return False
 
-            player.name = newName
-            player.speak_to_player("please enter a description of your character:")
-            return True
+        if cleanWordLength(name) == False:
+            player.speak_to_player("Your name is too long, please keep it under 153 characters")
+            return False
+                
+        newName = name.replace(" ", "")
+        for key, player in self.players.items():
+            if player.name == newName:
+                player.speak_to_player("someone is using that name please enter a new name")
+                return False
+
+        player.name = newName
+        player.speak_to_player("please enter a description of your character:")
+        return True
         
     def register_player_description(self, id, text):
         player = self.players[id]
         if player.description != "":
             return False
 
+        if cleanWordLength(text) == False:
+            player.speak_to_player("Your description is too long, please keep it under 153 characters")
+            return False
+        
         player.add_description(player.name)
         player.add_examine_description(text)
         player.speak_to_player("Looking good: " + player.name + " good luck!")
@@ -107,7 +118,7 @@ class Engine:
     
     def check_room_for_triggers(self, trigger_words, player):
        
-        if self.check_if_exploring(player, trigger_words):
+        if self.check_if_single_command(player, trigger_words):
             return
 
         list_of_entities = []
@@ -122,11 +133,19 @@ class Engine:
         for entity in list_of_entities:
             entity.try_commands(trigger_words, player)
 
-    def check_if_exploring(self, player, trigger_words):
+    def check_if_single_command(self, player, trigger_words):
         if len(trigger_words) == 1:
-            if (trigger_words[0] == "e" or trigger_words[0] == "ex"):
+            word = trigger_words[0].lower()
+            if (word == "e" or word == "ex"):
                 player.current_parent.try_commands(trigger_words, player)
                 return True
+            if (word == "i"):
+                player.try_commands(trigger_words, player)
+                return True
+            if word == "back":
+                player.move(player.current_parent.current_parent)
+                return True
+
         return False
 
     def check_if_triggered(self, entity, trigger_words, list_of_entities):
@@ -189,11 +208,15 @@ class Entity:
         return self.entities
 
     def remove(self, entity):
-        indexToRemove = 0
-        for i in range(len(self.entities) - 1):
+        index_to_delete = False
+        for i in range(len(self.entities)):
             if self.entities[i].id == entity.id:
-                indexToRemove = i
-        self.entities.pop(indexToRemove)
+                index_to_delete = i
+            
+        if (index_to_delete):
+            del self.entities[index_to_delete]
+
+
 
     def add_command(self, command):
         self.commands.append(command)
@@ -283,8 +306,8 @@ class Player(Entity):
         player.speak_to_player("Items: ")
         entities = player.get_entities()
         for e in entities:
-            player.speak_to_player(e.get_examine_description())
-        player.speak_to_player("")
+            player.speak_to_player("   " + e.get_examine_description())
+
 
     def speak_to_player(self, text):
         "Write text for client with id"
@@ -313,7 +336,10 @@ def cleanTriggerWords(words):
         word.lower()
     return words
 
-
+def cleanWordLength(word):
+    if len(word) > 153:
+        return False
+    return True
 
 exploring_word_set = ["e","look", "discover", "survey", "tour", "scout", "peer", "gander", "explore"]
 examine_word_set = ["ex", "search", "probe", "scrutinize", "research", "examine", "analyze", "seek", "prospect", "inspect", "question", "sift"]
