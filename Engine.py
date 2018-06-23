@@ -173,6 +173,7 @@ class Entity:
         self.id = Entity_id_count
         Entity_id_count += 1
         self.entities = []
+        self.name = ""
         self.description = ""
         self.examine_description = ""
         self.commands = []
@@ -181,6 +182,12 @@ class Entity:
         self.trigger_words = cleanTriggerWords(trigger_words)
         self.is_player = False
         self.data = {}
+        
+    def add_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
         
     def get_data(self):
         return self.data
@@ -305,7 +312,10 @@ class Player(Entity):
         player.speak_to_player("Items: ")
         entities = player.get_entities()
         for e in entities:
-            player.speak_to_player("   " + e.get_examine_description())
+            if e.get_name() == "":
+                player.speak_to_player("   " + e.get_examine_description())
+            else:
+                player.speak_to_player("   " + e.get_name())
 
     def speak_to_player(self, text):
         "Write text for client with id"
@@ -315,9 +325,6 @@ class Player(Entity):
         self.engine.broadcast_msg(self, "" + player.get_description() + "is examining" + self.get_description())
         player.speak_to_player(self.examine_description)
         player.speak_to_player("")
-
-    def get_name(self):
-        return self.name
 
     def __repr__(self):
         return self.name

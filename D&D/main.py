@@ -5,11 +5,10 @@ Higher level game logic
 import sys
 sys.path.append("./")
 from Engine import Engine, Entity, Player, Command
+from GameUtils import create_character
 from tavern import *
 
-def create_character(engine, id):
-    player_stats = {"str": 10}
-    engine.players[id].data = player_stats
+
 
 def test_start(engine):
     id = 1
@@ -26,10 +25,17 @@ def test_start(engine):
         "*e",
         #"*e",
         #"*ex",
-        "*i",
+        #"*i",
         "*get chair1",
-        #"*e",
-        "*back",
+        "*e",
+        "*i",
+        #"*get dagger",
+        "*e",
+        #can't equip if in inventory
+        "*equip dagger",
+        "*i",
+        "*e"
+        #"*back",
     ]
 
     for command in commands:
