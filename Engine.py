@@ -122,9 +122,17 @@ class Engine:
             return
 
         list_of_entities = []
+
+        #TODO clean this up to make it easy to add new command search targets
+        #check room
         self.check_if_triggered(player.current_parent, trigger_words, list_of_entities)
 
+        #check room's contents one level down
         for entity in player.current_parent.get_entities():
+            self.check_if_triggered(entity, trigger_words, list_of_entities)
+        
+        #check players inventory
+        for entity in player.get_entities():
             self.check_if_triggered(entity, trigger_words, list_of_entities)
 
         if len(list_of_entities) == 0:
@@ -134,8 +142,8 @@ class Engine:
             entity.try_commands(trigger_words, player)
 
     def check_if_single_command(self, player, trigger_words):
+        word = trigger_words[0].lower()
         if len(trigger_words) == 1:
-            word = trigger_words[0].lower()
             if (word == "e" or word == "ex"):
                 player.current_parent.try_commands(trigger_words, player)
                 return True
@@ -145,7 +153,6 @@ class Engine:
             if word == "back":
                 player.move(player.current_parent.current_parent)
                 return True
-
         return False
 
     def check_if_triggered(self, entity, trigger_words, list_of_entities):

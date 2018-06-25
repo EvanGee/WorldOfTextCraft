@@ -8,8 +8,6 @@ from Engine import Engine, Entity, Player, Command
 from GameUtils import create_character
 from tavern import *
 
-
-
 def test_start(engine):
     id = 1
     engine.register_player_id(id)
@@ -29,12 +27,13 @@ def test_start(engine):
         "*get chair1",
         "*e",
         "*i",
-        #"*get dagger",
+        "*get dagger",
         "*e",
         #can't equip if in inventory
         "*equip dagger",
-        "*i",
-        "*e"
+        #"*i",
+        #"*e",
+        "*attack table"
         #"*back",
     ]
 
@@ -54,10 +53,12 @@ def welcomeMessage(player):
     player.speak_to_player("welcome to WorldOfTextCraft! " + player.get_name() + "!!!")
     player.speak_to_player("if you just type something it will broadcast to all players. ")
     player.speak_to_player("if you type '*' and then a command we will try to figure it out. ")
-    player.speak_to_player("*i [player] -- this will diplay items. '*i' to check your own quickly")
-    player.speak_to_player("*explore [target]  -- this will give you an overview of the target 'e' for short")
-    player.speak_to_player("*examine [target]  -- this will give you a closer view of the target 'ex' for short")
-    player.speak_to_player("*back -- will bring you to the room you came from")
+    player.speak_to_player("*i [player] -- this will diplay items. '*i' to check your own quickly.")
+    player.speak_to_player("*explore [target]  -- this will give you an overview of the target 'e' for short.")
+    player.speak_to_player("*examine [target]  -- this will give you a closer view of the target 'ex' for short.")
+    player.speak_to_player("*equip   [target]  -- this will equip your character with an item from your inventory.")
+    player.speak_to_player("*back -- will bring you to the room you came from.")
+    player.speak_to_player("*attack  [target]  -- will attack the target with your currently equiped weapon.")
     player.speak_to_player("-------------------------------------------------------------------")
     WelcomeMessage(player)
 
