@@ -1,13 +1,5 @@
 from Engine import Engine, Entity, Player, Command
 
-
-def create_character(engine, id):
-    stats = {"attributes": {"str": 10, "dex":10, "con":10, "int": 10, "wis":10, "cha":10},
-            "equipement" : {"head":"", "torso": "", "hands":"", "feet":"", "auxiliary":"", "weapon":""}
-    }
-
-    engine.players[id].data = stats
-
 def pickUpItems(entities, player):
     if entities[0].current_parent.is_player:
         return

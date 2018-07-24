@@ -21,7 +21,7 @@ def Table(id):
     table = Entity(["table"+str(id)])
     table.add_name("wooden table")
     table.add_description("a simple wooden table"+str(id))
-    table.add_examine_description("a wooden table, it looks like a good place to place things")
+    table.add_examine_description("a wooden table, it looks like a good place to place things, you could go to the table if you wished")
     table.data = {"health" : 1}
     table.add_entity(Chair(1))
     table.add_entity(Chair(2))

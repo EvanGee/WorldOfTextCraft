@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
+from BlockChainFuncs import getPlayerStatsFromBlockChain
 from re import match
-
 Entity_id_count = 0
 
 
@@ -33,6 +33,7 @@ class Engine:
 
         if(self.register_player_description(id, text)):
             return True
+
         return False
             
     def register_player_id(self, id):
@@ -40,14 +41,18 @@ class Engine:
             self.new_player(id, "")
             self.players[id].speak_to_player("please enter your name:")
             return True
+        else:
+            return False
+        return True
 
     def register_player_name(self, id, name):
-        player = self.players[id]
-        if player.get_name() != "":
+        newPlayer = self.players[id]
+
+        if newPlayer.get_name() != "":
             return False
 
         if cleanWordLength(name) == False:
-            player.speak_to_player("Your name is too long, please keep it under 153 characters")
+            newPlayer.speak_to_player("Your name is too long, please keep it under 153 characters")
             return False
                 
         newName = name.replace(" ", "")
@@ -56,8 +61,9 @@ class Engine:
                 player.speak_to_player("someone is using that name please enter a new name")
                 return False
 
-        player.name = newName
-        player.speak_to_player("please enter a description of your character:")
+
+        newPlayer.name = newName
+        newPlayer.speak_to_player("please enter a description of your character:")
         return True
         
     def register_player_description(self, id, text):
@@ -71,6 +77,9 @@ class Engine:
         
         player.add_description(player.name)
         player.add_examine_description(text)
+
+        create_character(player)
+
         player.speak_to_player("Looking good: " + player.name + " good luck!")
         self.start_container.add_entity(player)
         return True
@@ -87,7 +96,6 @@ class Engine:
             if(self.register_player(id, text)):
                 continue
 
-
             self.parse_command(self.players[id], text)
 
     def new_player(self, id, name):
@@ -98,13 +106,14 @@ class Engine:
         return newPlayer
 
     def parse_command(self, player, text):
-        if (text[0] == '*'): 
-            trigger_words = text[1:].split()
+        trigger_words = text.split(" ")
+
+        if (trigger_words[0] == 'say'): 
+            self.broadcast_text(player, text)
+        else:
+    
             trigger_words = cleanTriggerWords(trigger_words)
             self.check_room_for_triggers(trigger_words, player)
-        else:
-            self.broadcast_text(player, text)
-
 
     def broadcast_text(self, fromPlayer, text):
         for _id in self.players:
@@ -153,6 +162,10 @@ class Engine:
             if word == "back":
                 player.move(player.current_parent.current_parent)
                 return True
+            if word == "stats":
+                player.try_commands(trigger_words, player)
+                return True
+
         return False
 
     def check_if_triggered(self, entity, trigger_words, list_of_entities):
@@ -186,6 +199,8 @@ class Entity:
         self.commands = []
         self.add_command(Command(self.examine, examine_word_set, [self]))
         self.add_command(Command(self.explore, exploring_word_set, [self]))
+        self.add_command(Command(self.get_stats, ["stats"], [self]))
+
         self.trigger_words = cleanTriggerWords(trigger_words)
         self.is_player = False
         self.data = {}
@@ -207,19 +222,20 @@ class Entity:
         for e in entities:
             self.add_entity(e)
 
+    def get_stats(self, entities, player):
+        player.speak_to_player(self.data)
+        
     def examine(self, entities, player):
-        player.speak_to_player("-------------------------------------------------------------------")
+        #player.speak_to_player("-------------------------------------------------------------------")
         player.speak_to_player(self.examine_description)
-        player.speak_to_player("")
         
     def explore(self, entities, player):
-        player.speak_to_player("-------------------------------------------------------------------")
+        #player.speak_to_player("-------------------------------------------------------------------")
         player.speak_to_player(self.get_description())
-        player.speak_to_player("")
 
         for e in self.entities:
             player.speak_to_player(e.get_description())
-            player.speak_to_player("")
+            #player.speak_to_player("")
 
     def get_entities(self):
         return self.entities
@@ -351,6 +367,15 @@ def cleanWordLength(word):
     if len(word) > 153:
         return False
     return True
+
+def create_character(player):
+
+    stats = getPlayerStatsFromBlockChain(player.id)
+    stats = { "attributes" : {'strength' : stats[0], 'dexterity': stats[1], 'constitution': stats[2], 'intelligence': stats[3], 'wisdom': stats[4], 'charisma': stats[5]},
+             "equipement" : {"head":"", "torso": "", "hands":"", "feet":"", "auxiliary":"", "weapon":""}
+            }
+    player.data = stats
+
 
 exploring_word_set = ["e","look", "discover", "survey", "tour", "scout", "peer", "gander", "explore"]
 examine_word_set = ["ex", "search", "probe", "scrutinize", "research", "examine", "analyze", "seek", "prospect", "inspect", "question", "sift"]
