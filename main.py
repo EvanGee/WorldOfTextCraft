@@ -2,16 +2,19 @@
 """
 Higher level game logic
 """
+
 from Engine import Engine, Entity, Player, Command
 from tavern import *
-
+from CryptoItems import *
+from BlockChainFuncs import *
 
 def test_start(engine):
-    id = "0x6425db4a91275ced171a7e7cfe914b63513b6bd4"
+    id = "0xcca4d2b2a1a38e8030c33861b97108680cd28cf0"
     engine.register_player_id(id)
     engine.register_player_name(id, "Evan")
     engine.register_player_description(id, "tall and good")
 
+    
     commands = [
         #"e",
         #"*ex tavern",
@@ -58,16 +61,19 @@ def welcomeMessage(player):
     player.speak_to_player("go [target]    -- will move you to a different room if you can.")
     player.speak_to_player("get [target]      -- will allow you to pick up an item.")
     player.speak_to_player("say [target]      -- will talk to other players")
+    player.speak_to_player("buy [target]      -- will allow you to purchase an Item if available for purchase")
     player.speak_to_player("-------------------------------------------------------------------")
     WelcomeMessage(player)
 
 
 def create_game():
-    engine = Engine(welcomeMessage)
-    engine.add_room("OilyRat", Tavern(engine))
-    engine.start_room("OilyRat")
+    #deployGameRegistry()
+    deployAllItems()
+    #engine = Engine(welcomeMessage)
+    #engine.add_room("OilyRat", Tavern(engine))
+    #engine.start_room("OilyRat")
     #engine.run()
-    test_start(engine)
+    #test_start(engine)
     
 #test()
 if __name__ == "__main__":
