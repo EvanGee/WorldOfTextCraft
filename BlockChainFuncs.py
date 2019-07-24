@@ -1,58 +1,81 @@
 import requests
 import sys
+import json
 
 url = "http://localhost:3030/blockchain/"
+gaslimit = 300000
 
 
 def getOwner(itemName):
 
         addr = getItemAddressBlockchain(itemName)
         r = requests.post(url + "call", json = {
-                'contract': 'Item',
+                'contract': 'GameComponent',
                 'address': addr,
                 'args': [],
                 'gas': '0',
                 "funcName": "getOwner",
         })
-        return r.text   
+        datastore = json.loads(r.text)
+        return datastore['payload']
+
+def getPlayerOwner(playerId):
+    
+        addr = getPlayerFromAddressBlockChain(playerId)
+        r = requests.post(url + "call", json = {
+                'contract': 'Player',
+                'address': addr,
+                'args': [],
+                'gas': '0',
+                "funcName": "getOwner",
+        })
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
 #----------------------------------items----------------------------------
 
-def deployItem(name, stats):
+def deployItem(name, stats, itemRegistry):
         r = requests.post(url + "deploy", json = {
                 'contract': 'Item',
                 'id': name,
                 'args': [stats],
-                'gas': '500000000'
+                'gas': gaslimit
         })
 
+        datastore = json.loads(r.text)
+        itemAddr = datastore['payload']
 
-        print("deployed: " + r.text)
-        if r.text == "":
+        print("deployed: " + itemAddr)
+        if itemAddr == "":
                 return
 
+        addedItem = addItemToRegistry(name, itemAddr, itemRegistry)
+        return addedItem
+
+def addItemToRegistry(name, itemAddr, itemRegistry):
         r2 = requests.post(url + "call", json = {
                 "contract": "NameRegistry",
-                "gas": "5000000",
-                "args": [name, r.text],
+                "gas": gaslimit,
+                "args": [name, itemAddr],
                 "funcName": "addName",
-                "id" : "NameRegistry"
         })
         print("added to registry: " + r2.text)
-        return r2.text
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
 def getItemAddressBlockchain(name):
-
+        itemRegistry = getItemRegistry()
         r = requests.post(url + "call", json = {
                 'contract': 'NameRegistry',
-                'id': "NameRegistry",
+                'address': itemRegistry,
                 'args': [name],
                 'gas': '0',
                 "funcName": "getAddress",
         })
-        return r.text
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
-def getItemStatsBlockchain(name):
+def getItemStatsBlockchainByName(name):
         addr = getItemAddressBlockchain(name)
 
         r = requests.post(url + "call", json = {
@@ -63,70 +86,98 @@ def getItemStatsBlockchain(name):
                 "funcName": "getStats"
         })
 
-        return r.text
+        datastore = json.loads(r.text)
+        return datastore['payload']
+
+def getItemStatsBlockchainByAddress(addr):
+        r = requests.post(url + "call", json = {
+                'contract': 'Item',
+                'address': addr,
+                'args': [],
+                'gas': '0',
+                "funcName": "getStats"
+        })
+
+        datastore = json.loads(r.text)
+        return datastore['payload']
+
+def checkIfItemIsInRegistryByAddress(address):
+        itemReg = getItemRegistry()
+        r = requests.post(url + "call", json = {
+                'contract': 'NameRegistry',
+                'address': itemReg,
+                'args': [address],
+                'gas': '0',
+                "funcName": "getName"
+        })
+        datastore = json.loads(r.text)
+        if datastore['payload'] == "0x0000000000000000000000000000000000000000":
+                return False
+        return True
 
 #the account in the wallet will buy it, not metamask
 def buy(itemName, value):
         addr = getItemAddressBlockchain(itemName)
         r = requests.post(url + "call", json = {
-                'contract': 'purchasable',
+                'contract': 'Purchasable',
                 'address': addr,
                 'args': [],
-                'gas': '50000',
+                'gas': gaslimit,
                 'value' : value,
                 "funcName": "buy"
         })
-        return r.text
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
 
 def getPrice(name):
 
         addr = getItemAddressBlockchain(name)
         r = requests.post(url + "call", json = {
-                'contract': 'purchasable',
-                'address': addr,
-                'args': [],
-                'gas': '0',
-                "funcName": "getPrice",
-        })
-        return r.text
-
-        
-def setPrice(name, price):
-
-        addr = getItemAddressBlockchain(name)
-        r = requests.post(url + "call", json = {
-                'contract': 'Item',
-                'address': addr,
-                'args': [price],
-                'gas': '50000',
-                "funcName": "setPrice",
-        })
-        return r.text
-
-#canTrade is a bool
-def setTradeAble(name, canTrade):
-        addr = getItemAddressBlockchain(name)
-        r = requests.post(url + "call", json = {
                 'contract': 'Purchasable',
                 'address': addr,
-                'args': [canTrade],
-                'gas': '50000',
-                "funcName": "setTradeAble",
+                'args': [],
+                'gas': gaslimit,
+                "funcName": "getPrice",
         })
-        return r.text
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
-def getisTradeAble(name):
-        addr = getItemAddressBlockchain(name)
+        
+def setPrice(address, price):
+
+        r = requests.post(url + "call", json = {
+                'contract': 'Item',
+                'address': address,
+                'args': [price],
+                'gas': gaslimit,
+                "funcName": "setPrice",
+        })
+        datastore = json.loads(r.text)
+        return datastore['payload']
+
+#canTrade is a bool
+def setIsPurchasable(itemAddr, canTrade):
+        r = requests.post(url + "call", json = {
+                'contract': 'Purchasable',
+                'address': itemAddr,
+                'args': [canTrade],
+                'gas': gaslimit,
+                "funcName": "setPurchasable",
+        })
+        datastore = json.loads(r.text)
+        return datastore['payload']
+
+def getIsPurchasable(name):
         r = requests.post(url + "call", json = {
                 'contract': 'Item',
                 'address': addr,
                 'args': [],
                 'gas': '0',
-                "funcName": "isTradable",
+                "funcName": "isPurchasable",
         })
-        return r.text
-
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
 
 #----------------------------------Players----------------------------------
@@ -134,108 +185,171 @@ def getisTradeAble(name):
 def getPlayerFromAddressBlockChain(address):
  
         try: 
-                r = requests.post("http://localhost:3030/blockchain/getContractAddress", json = {
-                        'contract': 'PlayerRegistry',
-                        'id': 'PlayerRegOne',
-                        'args': [],
-                        'gas': '5000000'
-                })       
-
+                playerReg = getPlayerRegistry()
                 r = requests.post(url + "call", json = {
                         'contract': 'PlayerRegistry',
                         'funcName': 'getPlayerByAddress',
-                        'address': r.text,
+                        'address': playerReg,
                         'args': [address],
-                        'gas': '0'
+                        'gas': 0
                 })
 
         except: 
                 return "0x0000000000000000000000000000000000000000"
 
-        return r.text
+
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
 
-def getPlayerItems(id):
+def getAllPlayerItems(id):
 
         addr = getPlayerFromAddressBlockChain(id)
-        try:
-                r = requests.post(url + "call", json = {
-                        'contract': 'Player',
-                        'address': addr,
-                        'args': [],
-                        'gas': '0',
-                        "funcName": "getItems",
-                })
-        except: 
-                return []
 
-        return r.text
+        items = getPlayerItemsFromBlockChain(addr)
+        returnItems = {}
+
+        for i in items:
+                if checkIfItemIsInRegistryByAddress(i):
+                        itemStats = getItemStatsBlockchainByAddress(i)
+                        name = getItemName(i)
+                        print(itemStats)
+                        print(name)
+                        returnItems[name] = itemStats
+
 
 
 def getPlayerStatsFromBlockChain(address):
 
         addr = getPlayerFromAddressBlockChain(address)
+   
         if addr == "0x0000000000000000000000000000000000000000":
-                return ['7','7','7','7','7','7','7','7']
+                return ['7','7','7','7','7','7']
 
-        r2 = requests.post("http://localhost:3030/blockchain/call", json = {
+        try:
+                r2 = requests.post("http://localhost:3030/blockchain/call", json = {
+                        'contract': 'Player',
+                        'funcName': 'getStats',
+                        'address': addr,
+                        'args': [],
+                        'gas': '0'
+                })
+                
+                datastore = json.loads(r2.text)    
+                text = datastore['payload']
+
+                if len(text) != 6:
+                        return ['7','7','7','7','7','7']
+                
+        except:
+                return ['7','7','7','7','7','7']
+
+        return text
+
+def getPlayerItemsFromBlockChain(address):
+        addr = getPlayerFromAddressBlockChain(address)
+        if addr == "0x0000000000000000000000000000000000000000":
+                return []
+
+        r = requests.post("http://localhost:3030/blockchain/call", json = {
                 'contract': 'Player',
-                'funcName': 'getStats',
+                'funcName': 'getItems',
                 'address': addr,
                 'args': [],
                 'gas': '0'
         })
-        text = r2.text.replace("[", "")
-        text = text.replace("]", "")
-        text = text.replace("'", "")
-        text = text.replace("\"", "")
-        text = text.split(',')
 
-        return text
+        datastore = json.loads(r.text)
+        items = datastore['payload']
+        print("player items on blockchain: " + str(items))
+        return items
 
+def getDefaultAddress():
+        r = requests.get("http://localhost:3030/accounts/defaultAddress")
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
 #------------------------------Registr--------------------------------------
 def deployGameRegistry():
-        try: 
-                r = requests.post("http://localhost:3030/blockchain/getContractAddress", json = {
-                        'contract': 'PlayerRegistry',
-                        'id': 'PlayerRegOne',
-                        'args': [],
-                        'gas': '5000000'
-                })       
-        
-        except:
-                return
-        
-
-        if r.text != "":
-                return
-        
-        r = requests.post("http://localhost:3030/blockchain/deploy", json = {
-                'contract': 'PlayerRegistry',
-                'id': 'PlayerRegOne',
+        r = requests.post(url + "deploy", json = {
+                'contract': 'Game',
+                'id': 'Game',
                 'args': [],
-                'gas': '5000000'
+                'gas': gaslimit
         })
+        datastore = json.loads(r.text)
+        return datastore['payload']
+        
+def getItemRegistry():
+        r = requests.post(url + "call", json = {
+                'contract': 'Game',
+                'id': 'Game',
+                'args': [],
+                'funcName': "getItemRegistry",
+                'gas': 0
+        })
+        datastore = json.loads(r.text)
+        return datastore['payload']
 
-        r = requests.post("http://localhost:3030/blockchain/call", json = {
-                "contract": "PlayerRegistry",
-                "gas": "5000000",
-                "address": res.data,
-                "args": [[10,10,10,10,10,11]],
-                "funcName": "newPlayer",
-                "id" : "PlayerRegOne"
+def getPlayerRegistry():
+        r = requests.post(url + "call", json = {
+                'contract': 'Game',
+                'id': 'Game',
+                'args': [],
+                'gas': 0,
+                'funcName': "getPlayerRegistry"
         })
+        datastore = json.loads(r.text)
+        return datastore['payload']
+
+def getItemName(addr):
+        itemReg = getItemRegistry()
+        r = requests.post(url + "call", json = {
+                'contract': 'NameRegistry',
+                'address': itemReg,
+                'args': [addr],
+                'funcName': "getName",
+                'gas': 0
+        })
+        datastore = json.loads(r.text)
+        return datastore['payload']
+
+def getitemAddress(name):
+        itemReg = getItemRegistry()
+        r = requests.post(url + "call", json = {
+                'contract': 'NameRegistry',
+                'address': itemReg,
+                'args': [names],
+                'funcName': "getAddress",
+                'gas': 0
+        })
+        datastore = json.loads(r.text)
+        return datastore['payload']
 #------------------------------Integration--------------------------------------
 
-def build_item(name, stats, price, isTradable):
-        print(deployItem(name, stats))
-        print(setPrice(name, price))
-        print(setTradeAble(name, isTradable))
+def build_item(name, stats, price, isPurchasable):
+        itemRegistry = getItemRegistry()
+        itemAddr = deployItem(name, stats, itemRegistry)
+        setPrice(itemAddr, price)
+        setIsPurchasable(itemAddr, isPurchasable)
 
 
 def deployAllItems():
         id = "0xcca4d2b2a1a38e8030c33861b97108680cd28cf0"
-        #print(getItemAddressBlockchain("luckyDragonDagger"))
-        #print(getItemStatsBlockchain("luckyDragonDagger"))
         #build_item("luckyDragonGoldenDagger", [7,7,7,7,7,7,7,7], 50000, True)
+
+def unitTests():
+                
+        playerAddr = getDefaultAddress()
+        print("defaultAddr: " + playerAddr)
+        stats = getPlayerStatsFromBlockChain(playerAddr)
+        print("stats: " + str(stats))
+        items = getPlayerItemsFromBlockChain(playerAddr)
+        for i in items:
+                if checkIfItemIsInRegistryByAddress(i):
+                        itemStats = getItemStatsBlockchainByAddress(i)
+                        name = getItemName(i)
+                        print(itemStats)
+                        print(name)
+
+#unitTests()

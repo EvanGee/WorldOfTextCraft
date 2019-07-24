@@ -13,8 +13,10 @@ def test_start(engine):
     engine.register_player_id(id)
     engine.register_player_name(id, "Evan")
     engine.register_player_description(id, "tall and good")
-
     
+
+    print("GETTING PLAYER OWNER" + str(getPlayerOwner("0xcca4d2b2a1a38e8030c33861b97108680cd28cf0")))
+    print("GETTING PLAYER OWNER" + str(getPlayerOwner("0xa78a5ec4d0bc1c1321729cbf18ffb8d9a588e775")))
     commands = [
         #"e",
         #"*ex tavern",
@@ -34,8 +36,10 @@ def test_start(engine):
         #"*e",
         #"attack table"
         #*back",
-        "stats",
-        "stats table"
+        #"stats",
+        #"stats table"
+        "e",
+        #"buy luckyDragonGoldenDagger"
     ]
 
     for command in commands:
@@ -68,12 +72,13 @@ def welcomeMessage(player):
 
 def create_game():
     #deployGameRegistry()
-    deployAllItems()
-    #engine = Engine(welcomeMessage)
-    #engine.add_room("OilyRat", Tavern(engine))
-    #engine.start_room("OilyRat")
+    #deployAllItems()
+    
+    engine = Engine(welcomeMessage)
+    engine.add_room("OilyRat", Tavern(engine))
+    engine.start_room("OilyRat")
     #engine.run()
-    #test_start(engine)
+    test_start(engine)
     
 #test()
 if __name__ == "__main__":

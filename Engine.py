@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from BlockChainFuncs import getPlayerStatsFromBlockChain
+from BlockChainFuncs import getPlayerStatsFromBlockChain, getAllPlayerItems
 from re import match
 Entity_id_count = 0
 
@@ -375,6 +375,7 @@ def create_character(player):
              "equipement" : {"head":"", "torso": "", "hands":"", "feet":"", "auxiliary":"", "weapon":""}
             }
     player.data = stats
+    items = getAllPlayerItems(player.id);
 
 
 exploring_word_set = ["e","look", "discover", "survey", "tour", "scout", "peer", "gander", "explore"]

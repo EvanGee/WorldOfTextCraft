@@ -4,7 +4,7 @@ sys.path.append("./")
 
 from Engine import Engine, Entity, Player, Command
 from GameUtils import command_travel, command_pick_up, command_equip, command_attack
-
+from CryptoItems import *
 
 
 def dagger(id):
@@ -44,4 +44,7 @@ def Tavern(engine):
     tavern.add_description("The Oily Rat tavern is alive and well! patrons from nearby towns gather to hear what quests the curier has to offer!")
     tavern.add_examine_description("The tavern is sturdily built, its location at the county's crossroads makes it an ideal place meet")
     tavern.add_entity(Table(""))
+    tavern.add_entity(luckyDragonGoldenDaggerBlockChain())
+
     return tavern
+

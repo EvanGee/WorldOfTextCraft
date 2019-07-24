@@ -1,4 +1,6 @@
 from Engine import Engine, Entity, Player, Command
+from BlockChainFuncs import *
+
 
 def pickUpItems(entities, player):
     if entities[0].current_parent.is_player:
@@ -28,7 +30,7 @@ def equip_item(entities, player):
     if (equipement.current_parent != player):
         player.speak_to_player("Cannot equip " + equipement.get_name() +", it's not in your inventory")
         return
-    player.data["equipement"][equipement.data["equip"]] = equipement.data
+    player.data["equipment"][equipement.data["equip"]] = equipement.data
     player.speak_to_player("equiped " + equipement.get_name())
 
 def command_equip(item):
@@ -51,3 +53,13 @@ def attack(entities, player):
 
 def command_attack(target):
     return Command(attack, ["attack"], [target])
+
+def buy(entities, player):
+    item = entities[0]
+    player.speak_to_player("buy:"+item.id+"")
+
+def command_buy(target):
+    return Command(buy, ["buy"], [target])
+
+
+     
