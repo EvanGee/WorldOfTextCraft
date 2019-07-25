@@ -1,17 +1,20 @@
 #!/usr/bin/python3
 
 from BlockChainFuncs import getPlayerStatsFromBlockChain, getAllPlayerItems
+
 from re import match
 Entity_id_count = 0
 
 
 class Engine:
     # Map player ids to their entities
-    def __init__(self, welcome_message):
+    def __init__(self, welcome_message, create_character, create_character_params):
         self.players = dict()
         self.container_dict = dict()
         self.welcomeMessage = welcome_message
         self.start_container = Entity(["start"])
+        self.create_character = create_character
+        self.create_character_params = create_character_params
 
     def add_room(self, name, entity):
         entity.current_parent = entity
@@ -78,7 +81,7 @@ class Engine:
         player.add_description(player.name)
         player.add_examine_description(text)
 
-        create_character(player)
+        self.create_character(player, self.create_character_params)
 
         player.speak_to_player("Looking good: " + player.name + " good luck!")
         self.start_container.add_entity(player)
@@ -215,8 +218,8 @@ class Entity:
         return self.data
 
     def add_entity(self, entity):
-        self.entities.append(entity)
         entity.current_parent = self
+        self.entities.append(entity)
 
     def add_entities(self, entities):
         for e in entities:
@@ -251,6 +254,15 @@ class Entity:
 
     def add_command(self, command):
         self.commands.append(command)
+    
+    def remove_command(self, command):
+        index_to_delete = False
+        for i in range(len(self.commands)):
+            if self.commands[i].get_trigger_words()[0] == command:
+                index_to_delete = i
+            
+        if (index_to_delete):
+            del self.commands[index_to_delete]
 
     def try_commands(self, trigger_words, player):
         for command in self.commands:
@@ -276,6 +288,9 @@ class Entity:
 
     def get_description(self):
         return self.description
+
+    def get_commands(self):
+        return self.commands
 
     def has_entity(self, item):
         for entity in self.entities:
@@ -303,6 +318,9 @@ class Command:
 
     def do(self, player):
         self.command(self.entities, player)
+
+    def get_trigger_words(self):
+        return self.trigger_words
     
     def try_command(self, trigger_words, player):
         if(len(intersection(self.trigger_words, trigger_words)) !=0):
@@ -367,15 +385,6 @@ def cleanWordLength(word):
     if len(word) > 153:
         return False
     return True
-
-def create_character(player):
-
-    stats = getPlayerStatsFromBlockChain(player.id)
-    stats = { "attributes" : {'strength' : stats[0], 'dexterity': stats[1], 'constitution': stats[2], 'intelligence': stats[3], 'wisdom': stats[4], 'charisma': stats[5]},
-             "equipement" : {"head":"", "torso": "", "hands":"", "feet":"", "auxiliary":"", "weapon":""}
-            }
-    player.data = stats
-    items = getAllPlayerItems(player.id);
 
 
 exploring_word_set = ["e","look", "discover", "survey", "tour", "scout", "peer", "gander", "explore"]

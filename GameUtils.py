@@ -8,6 +8,7 @@ def pickUpItems(entities, player):
     entities[0].move(player)
 
 def travel(entities, player):
+    player.speak_to_player("you traveled to the " + entities[0].get_name())
     player.move(entities[0])
 
 def broadcast(entities, player):
@@ -62,4 +63,21 @@ def command_buy(target):
     return Command(buy, ["buy"], [target])
 
 
-     
+def listEntities(entities, player):
+    for entity in entities[0].get_entities():
+        player.speak_to_player(entity)
+
+def command_list(target):
+    return Command(listEntities, ["list"], [target])
+
+    
+def add_descriptions(entity, description, examine):
+    entity.add_description(description + " " + str(entity.get_trigger_words()))
+    commands = entity.get_commands()
+    triggerWords = []
+
+    for i in range(2, len(commands)):
+        triggerWords.append(commands[i].get_trigger_words()[0])
+
+    entity.add_examine_description(examine + " " + str(triggerWords))
+    return entity

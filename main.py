@@ -4,8 +4,8 @@ Higher level game logic
 """
 
 from Engine import Engine, Entity, Player, Command
-from tavern import *
-from CryptoItems import *
+from World import *
+from CryptoItems import CryptoItems
 from BlockChainFuncs import *
 
 def test_start(engine):
@@ -15,8 +15,9 @@ def test_start(engine):
     engine.register_player_description(id, "tall and good")
     
 
-    print("GETTING PLAYER OWNER" + str(getPlayerOwner("0xcca4d2b2a1a38e8030c33861b97108680cd28cf0")))
-    print("GETTING PLAYER OWNER" + str(getPlayerOwner("0xa78a5ec4d0bc1c1321729cbf18ffb8d9a588e775")))
+    #print("GETTING PLAYER OWNER" + str(getPlayerOwner("0xcca4d2b2a1a38e8030c33861b97108680cd28cf0")))
+    #print("GETTING PLAYER OWNER" + str(getPlayerOwner("0xa78a5ec4d0bc1c1321729cbf18ffb8d9a588e775")))
+
     commands = [
         #"e",
         #"*ex tavern",
@@ -39,7 +40,17 @@ def test_start(engine):
         #"stats",
         #"stats table"
         "e",
-        #"buy luckyDragonGoldenDagger"
+        "ex tavern",
+        "ex store",
+        "go store",
+        "e",
+        "ex",
+        "ex Potato",
+        "stats Potato",
+        "stats GauntletsOfOgers",
+        "stats Potato",
+        "back",
+        "e"
     ]
 
     for command in commands:
@@ -73,9 +84,10 @@ def welcomeMessage(player):
 def create_game():
     #deployGameRegistry()
     #deployAllItems()
-    
-    engine = Engine(welcomeMessage)
-    engine.add_room("OilyRat", Tavern(engine))
+    cryptoItemEngine = CryptoItems()
+    engine = Engine(welcomeMessage, create_character, cryptoItemEngine)
+    engine.add_room("OilyRat", Tavern(cryptoItemEngine))
+
     engine.start_room("OilyRat")
     #engine.run()
     test_start(engine)

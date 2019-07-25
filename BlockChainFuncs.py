@@ -3,7 +3,7 @@ import sys
 import json
 
 url = "http://localhost:3030/blockchain/"
-gaslimit = 300000
+gaslimit = 3000000
 
 
 def getOwner(itemName):
@@ -46,20 +46,17 @@ def deployItem(name, stats, itemRegistry):
         itemAddr = datastore['payload']
 
         print("deployed: " + itemAddr)
-        if itemAddr == "":
-                return
-
-        addedItem = addItemToRegistry(name, itemAddr, itemRegistry)
-        return addedItem
+        return itemAddr
 
 def addItemToRegistry(name, itemAddr, itemRegistry):
-        r2 = requests.post(url + "call", json = {
+        r = requests.post(url + "call", json = {
                 "contract": "NameRegistry",
                 "gas": gaslimit,
+                "address": itemRegistry,
                 "args": [name, itemAddr],
                 "funcName": "addName",
         })
-        print("added to registry: " + r2.text)
+        print("added to registry: " + r.text)
         datastore = json.loads(r.text)
         return datastore['payload']
 
@@ -137,7 +134,7 @@ def getPrice(name):
                 'contract': 'Purchasable',
                 'address': addr,
                 'args': [],
-                'gas': gaslimit,
+                'gas': 0,
                 "funcName": "getPrice",
         })
         datastore = json.loads(r.text)
@@ -154,6 +151,7 @@ def setPrice(address, price):
                 "funcName": "setPrice",
         })
         datastore = json.loads(r.text)
+        print("set price: "+ datastore['paylaod'])
         return datastore['payload']
 
 #canTrade is a bool
@@ -169,6 +167,7 @@ def setIsPurchasable(itemAddr, canTrade):
         return datastore['payload']
 
 def getIsPurchasable(name):
+        addr = getItemAddressBlockchain(name)
         r = requests.post(url + "call", json = {
                 'contract': 'Item',
                 'address': addr,
@@ -213,10 +212,8 @@ def getAllPlayerItems(id):
                 if checkIfItemIsInRegistryByAddress(i):
                         itemStats = getItemStatsBlockchainByAddress(i)
                         name = getItemName(i)
-                        print(itemStats)
-                        print(name)
                         returnItems[name] = itemStats
-
+        return returnItems
 
 
 def getPlayerStatsFromBlockChain(address):
@@ -330,6 +327,7 @@ def getitemAddress(name):
 def build_item(name, stats, price, isPurchasable):
         itemRegistry = getItemRegistry()
         itemAddr = deployItem(name, stats, itemRegistry)
+        addedItem = addItemToRegistry(name, itemAddr, itemRegistry)
         setPrice(itemAddr, price)
         setIsPurchasable(itemAddr, isPurchasable)
 
