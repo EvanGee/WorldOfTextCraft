@@ -1,19 +1,14 @@
-So making this markdown litterally minutes before submitting
+This is a text based adventure Engine that I built for the lols a while back.
+However, Now I attached a crypto currency module to it. That allows one to use items serialized on the blockchain!
+It works as a stand alone text based engine, however, there are a couple functions you need to define before it will work,
+will add proper documentation soon.
 
+This probably doesn't work anymore:
 
-To run this game you have to build the server.go to your
-architeture. The client is a simple tcp client, you can also
-play this game really well with netcat!
+./server python3 main.py
 
-to run this game you need python 3.6 or later 
-installed when the game is built
-
-run it with
-
-./server python evansGame.py
-
-and connect to it with, if you don't sepcify the IP
-then it will connect to my server, please don't DOS 
-it.
+and connect to it with it.
 
 ./client 127.0.0.1:1111
+
+If you want to use a better client I hav something in the works
